@@ -1,0 +1,33 @@
+{# templates/admin/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}User Management{% endblock %}
+
+{% block body %}
+    <h1>User Management</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.emri }}</td>
+                    <td>{{ user.mosha }}</td>
+                    <td>{{ user.role ? user.role|title : 'No Role' }}</td>
+                    <td>
+                        <a href="{{ path('admin_edit_user_role', {id: user.id}) }}" class="btn btn-primary">Edit Role</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
