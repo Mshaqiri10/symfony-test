@@ -2,15 +2,19 @@
 
 namespace App\Controller;
 
-use App\Entity\Userat;
-use App\Form\UserRoleType;
+use App\Entity\Listing;
+use App\Form\ListingType;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Entity;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+// use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted as AttributeIsGranted;
 
+#[Route('/admin')]
+#[AttributeIsGranted('ROLE_EDITOR')]
 class AdminController extends AbstractController
 {
 
@@ -18,40 +22,86 @@ class AdminController extends AbstractController
     {
     }
 
-    #[Route('/admin/users', name: 'admin_user_list')]
-    public function index(Request $request): Response
+    #[Route('/', name: 'admin_dashboard')]
+    public function dashboard(): Response
     {
-        // Fetch all users from the database using the entity manager
-        $users = $this->em->getRepository(Userat::class)->findAll();
+        return $this->render('admin/dashboard.html.twig');
+    }
 
-        return $this->render('admin/index.html.twig', [
-            'users' => $users,
+    #[Route('/listings', name: 'admin_listings')]
+    public function manageListings(): Response
+    {
+        $listings = $this->em->getRepository(Listing::class)->findAll();
+
+        return $this->render('admin/listings.html.twig', [
+            'listings' => $listings,
         ]);
     }
 
-    #[Route('/admin/users/{id}/edit-role', name: 'admin_edit_user_role')]
-    public function edit(Request $request, Userat $user): Response
+    #[Route('/listing/new', name: 'admin_listing_new')]
+    public function newListing(Request $request, #[Autowire('%photos_directory%')] string $photoDir): Response
     {
-        // Fetch the entity manager from the injected dependency
-        $entityManager = $this->em;
-
-        // Create the edit form for the user
-        $form = $this->createForm(UserRoleType::class, $user);
-
-        // Handle the form submission
+        $listing = new Listing();
+        $form = $this->createForm(ListingType::class, $listing);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Persist changes to the database
-            $entityManager->flush();
 
-            // Redirect back to the user list
-            return $this->redirectToRoute('admin_user_list');
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($photo = $form['photo']->getData()) {
+                $filename = uniqid().'.'.$photo->guessExtension();
+                $photo->move($photoDir, $filename);
+                $listing->setPhoto($filename);
+            }
+
+            $this->em->persist($listing);
+            $this->em->flush();
+
+            return $this->redirectToRoute('admin_listings');
         }
 
-        // Render the edit user form
-        return $this->render('admin/edit.html.twig', [
-            'user' => $user,
+        return $this->render('admin/new.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/listing/edit/{id}', name: 'admin_listing_edit')]
+    public function editListing(int $id, Request $request, #[Autowire('%photos_directory%')] string $photoDir): Response
+    {
+        $listing = $this->em->getRepository(Listing::class)->find($id);
+        if (!$listing) {
+            throw $this->createNotFoundException('The listing does not exist');
+        }
+
+        $form = $this->createForm(ListingType::class, $listing);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($photo = $form['photo']->getData()) {
+                $filename = uniqid().'.'.$photo->guessExtension();
+                $photo->move($photoDir, $filename);
+                $listing->setPhoto($filename);
+            }
+
+            $this->em->flush();
+
+            return $this->redirectToRoute('admin_listings');
+        }
+
+        return $this->render('admin/edit.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/listing/delete/{id}', name: 'admin_listing_delete', methods: ['POST'])]
+    public function deleteListing(int $id, Request $request): Response
+    {
+        $listing = $this->em->getRepository(Listing::class)->find($id);
+        if (!$listing) {
+            throw $this->createNotFoundException('The listing does not exist');
+        }
+
+        $this->em->remove($listing);
+        $this->em->flush();
+
+        return $this->redirectToRoute('admin_listings');
     }
 }

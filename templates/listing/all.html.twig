@@ -1,0 +1,20 @@
+{# templates/listing/overview.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>All Listings</h1>
+
+    <div class="listings">
+        {% for p in pagination %}
+            <div class="listing">
+                <h2>{{ p.title }}</h2>
+                <p>{{ p.description }}</p>
+                <img src="{{ asset('uploads/photos/' ~ (p.photo ? p.photo : 'default_photo.jpeg')) }}" alt="Listing photo" style="width:150px; height: 80px;">
+            </div>
+        {% endfor %}
+    </div>
+    <div class="pagination justify-content-center ">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+{% endblock %}

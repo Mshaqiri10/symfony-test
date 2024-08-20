@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use app\Controller\ListingController;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,7 +14,8 @@ class SecurityController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_lucky_number');
+    
+            return $this->redirectToRoute('listing_new');
         }
 
         // get the login error if there is one

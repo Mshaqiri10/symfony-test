@@ -10,48 +10,45 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+// use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 class RegistrationController extends AbstractController
 {
-    // private $entityManager;
+    
 
     public function __construct(private EntityManagerInterface $entityManager)
     {
-        // $this->entityManager = $entityManager;
+        
     }
 
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher): Response
     {
-       
         $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user, [
-            'validation_groups' => ['registration']
-        ]);
-        
+        $form = $this->createForm(RegistrationFormType::class, $user);
+
         $form->handleRequest($request);
-         
-        // dd($form->getErrors());
+
         
         if ($form->isSubmitted() && $form->isValid()) {
-          
-            // encode the plain password
-       
-            $user->setPassword(
-                $userPasswordHasher->hashPassword(
-                    $user,
-                    $form->get('plainPassword')->getData()
-                )
-            );
+            $plainPassword = $form->get('plainPassword')->getData();
 
+            // Encode the plain password and set it to the user entity
+            $hashedPassword = $userPasswordHasher->hashPassword(
+                $user,
+                $plainPassword
+            );
+            $user->setPassword($hashedPassword);
+           // dd($form->getData($user));
+            // Assign default roles (e.g., ROLE_USER)
+            $defaultRole = 'ROLE_USER';
+            $user->setRoles([$defaultRole]);
+            // Persist and flush the user entity
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            // do anything else you need here, like send an email
-
-            return $this->redirectToRoute('app_lucky_number');
+            return $this->redirectToRoute('all_listings');
         }
 
         return $this->render('registration/register.html.twig', [

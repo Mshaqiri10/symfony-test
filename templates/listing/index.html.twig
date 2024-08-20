@@ -9,9 +9,14 @@
 </style>
 
 <div class="example-wrapper">
+    
     {% if listings %}
     {% for l in listings %}
-        {{ l.description }} |  {{ l.title }}</br>
+    {{ l.title }} | {{ l.description }} | {{ l.user.email }}
+        <img style="width:150px; height: 80px;"  src="{{ asset('uploads/photos/' ~ (l.photo ? l.photo : 'default_photo.jpeg')) }}" alt="">
+        <a href="{{ path('edit_listing', {'id': l.id}) }}" class="btn btn-primary">Edit</a>
+    </br>
+    </br>
        
     {% endfor %}
     {% else %}

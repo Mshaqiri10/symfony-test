@@ -18,6 +18,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -27,7 +29,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Assert\NotBlank(groups: ["registration"])]
+    // #[Assert\NotBlank(groups: ["registration"])]
     #[Assert\Email(groups: ["registration"])]
     private ?string $email = null;
 
@@ -41,17 +43,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    // Apply the NotNull constraint only during the "finalize" group
+    #[Assert\NotNull(groups: ["finalize"])]
     private ?string $password = null;
 
     /**
      * @var string|null Plain password
      */
-    #[Assert\NotBlank(groups: ["registration"])]
-    #[Assert\Length(
-        min: 8,
-        minMessage: "Your password must be at least {{ limit }} characters long",
-        groups: ["registration"]
-    )]
+
     private ?string $plainPassword = null;
 
     /**

@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Listings{% endblock %}
+
+{% block body %}
+<h1>Manage Listings</h1>
+<a href="{{ path('admin_listing_new') }}">Create New Listing</a>
+<ul>
+    {% for listing in listings %}
+    <li>
+        {{ listing.title }} - 
+        <a href="{{ path('admin_listing_edit', {id: listing.id}) }}">Edit</a> |
+        <form method="post" action="{{ path('admin_listing_delete', {id: listing.id}) }}" style="display:inline-block;">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ listing.id) }}">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

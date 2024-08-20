@@ -8,11 +8,53 @@
             <h1 class="text-6xl pt-12 pb-8">
                 Register
             </h1>
-          
-            {{ form_start(registrationForm) }}
-            {{ form_widget(registrationForm) }}
-            {{ form_end(registrationForm) }}
 
+            {{ form_start(registrationForm) }}
+
+            {# Display global form errors if any #}
+            {% if registrationForm.vars.errors|length > 0 %}
+                <div class="alert alert-danger">
+                    {{ form_errors(registrationForm) }}
+                </div>
+            {% endif %}
+
+            <div class="mb-4">
+                {{ form_label(registrationForm.username) }}
+                {{ form_widget(registrationForm.username) }}
+                {{ form_errors(registrationForm.username) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(registrationForm.email) }}
+                {{ form_widget(registrationForm.email) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(registrationForm.plainPassword.first) }}
+                {{ form_widget(registrationForm.plainPassword.first) }}
+                {% if registrationForm.plainPassword.first.vars.errors|length > 0 %}
+                    <div class="alert alert-danger">
+                        {{ form_errors(registrationForm.plainPassword.first) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(registrationForm.plainPassword.second) }}
+                {{ form_widget(registrationForm.plainPassword.second) }}
+                {% if registrationForm.plainPassword.second.vars.errors|length > 0 %}
+                    <div class="alert alert-danger">
+                        {{ form_errors(registrationForm.plainPassword.second) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                {{ form_widget(registrationForm.submit, { 'label': 'Register' }) }}
+            </div>
+
+            {{ form_end(registrationForm) }}
         </div>
     </div>
 {% endblock %}
